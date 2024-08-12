@@ -1,30 +1,67 @@
 ﻿<Window x:Class="Cal.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Calculator" Height="382" Width="300">
-    <Grid>
+        Title="Calculator" Height="532" Width="301">
+    <Grid Margin="0,10,0,30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="425*"/>
+            <RowDefinition Height="36*"/>
+        </Grid.RowDefinitions>
         <!-- 결과를 표시할 큰 텍스트박스 -->
         <TextBox x:Name="ResultDisplay" FontSize="48" IsReadOnly="True" VerticalAlignment="Top" Margin="10,55,10,0" Height="75" />
 
         <!-- 연산식을 표시할 작은 텍스트박스 -->
         <TextBox x:Name="ExpressionDisplay" FontSize="24" IsReadOnly="True" VerticalAlignment="Top" Margin="10,10,10,0" Height="40" Background="LightGray" />
 
-        <UniformGrid Rows="4" Columns="4" HorizontalAlignment="Center" VerticalAlignment="Top" Height="214" Width="280" Margin="0,140,0,0">
+        <UniformGrid Rows="7" Columns="4" HorizontalAlignment="Center" VerticalAlignment="Top" Height="345" Width="280" Margin="0,83,0,0" Grid.RowSpan="2">
+            <!-- 첫 번째 행 (Memory functions) -->
+            <Button Content="MC" Click="MemoryClearButton_Click" Margin="0,61,0,-31"/>
+            <Button Content="MR" Click="MemoryRecallButton_Click" Margin="0,61,0,-31"/>
+            <Button Content="M+" Click="MemoryAddButton_Click" Margin="0,61,0,-31"/>
+            <Button Content="M-" Click="MemorySubtractButton_Click" Margin="0,61,0,-31"/>
+
+            <!-- 두 번째 행 (Memory Store and List) -->
+            <Button Content="MS" Click="MemoryStoreButton_Click" Margin="0,31,0,0"/>
+            <Button Content="M목록" Click="MemoryListButton_Click" Margin="0,31,0,0"/>
+            <Button Content="" IsEnabled="False" Margin="0,31,0,0"/>
+            <!-- Empty space -->
+            <Button Content="" IsEnabled="False" Margin="0,31,0,0"/>
+            <!-- Empty space -->
+
+            <!-- 세 번째 행 -->
+            <Button Content="%" Click="PercentButton_Click"/>
+            <Button Content="CE" Click="ClearEntryButton_Click"/>
+            <Button Content="C" Click="ClearButton_Click"/>
+            <Button Content="Back" Click="BackButton_Click"/>
+
+            <!-- 네 번째 행 -->
+            <Button Content="1/x" Click="ReciprocalButton_Click"/>
+            <Button Content="x²" Click="SquareButton_Click"/>
+            <Button Content="√x" Click="SquareRootButton_Click"/>
+            <Button Content="/" Click="OperatorButton_Click"/>
+
+            <!-- 다섯 번째 행 -->
             <Button Content="7" Click="NumberButton_Click"/>
             <Button Content="8" Click="NumberButton_Click"/>
             <Button Content="9" Click="NumberButton_Click"/>
-            <Button Content="C" Click="ClearButton_Click"/>
+            <Button Content="*" Click="OperatorButton_Click"/>
+
+            <!-- 여섯 번째 행 -->
             <Button Content="4" Click="NumberButton_Click"/>
             <Button Content="5" Click="NumberButton_Click"/>
             <Button Content="6" Click="NumberButton_Click"/>
             <Button Content="-" Click="OperatorButton_Click"/>
+
+            <!-- 일곱 번째 행 -->
             <Button Content="1" Click="NumberButton_Click"/>
             <Button Content="2" Click="NumberButton_Click"/>
             <Button Content="3" Click="NumberButton_Click"/>
             <Button Content="+" Click="OperatorButton_Click"/>
-            <Button Content="/" Click="OperatorButton_Click"/>
+
+            <!-- 여덟 번째 행 -->
+            <Button Content="+/-" Click="NegateButton_Click"/>
             <Button Content="0" Click="NumberButton_Click"/>
-            <Button Content="*" Click="OperatorButton_Click"/>
+            <Button Content="." Click="NumberButton_Click"/>
             <Button Content="=" Click="EqualButton_Click"/>
         </UniformGrid>
     </Grid>
