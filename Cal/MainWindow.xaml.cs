@@ -73,18 +73,25 @@ namespace Cal
             operation = button.Content.ToString();
 
             // 마지막에 '=' 버튼이 눌린 후에는 디스플레이를 초기화
-            if (lastEqualPressed)
-            {
-                thirdNumber = double.Parse(ResultDisplay.Text); // 연속연산시 ResultDisplay 값을
-                ClearDisplayAfterEqual(); // display 초기화 하고
-                ExpressionDisplay.Text= thirdNumber.ToString(); // ExpressionDisplay로 넘김 
 
-            }
 
             try
             {
-                firstNumber = double.Parse(ResultDisplay.Text);
-                ResultDisplay.Text = ""; // 다음 입력을 위해 결과 디스플레이를 초기화
+                if (lastEqualPressed)
+                {
+                    thirdNumber = double.Parse(ResultDisplay.Text); // 연속연산시 ResultDisplay 값을
+                    ClearDisplayAfterEqual(); // display 초기화 하고
+                    ExpressionDisplay.Text = thirdNumber.ToString(); // ExpressionDisplay로 넘김 
+                    firstNumber = thirdNumber;
+                    thirdNumber = 0;
+                    firstNumber = double.Parse(ResultDisplay.Text);
+                    ResultDisplay.Text = ""; // 다음 입력을 위해 결과 디스플레이를 초기화
+                }
+                else
+                {
+                    firstNumber = double.Parse(ResultDisplay.Text);
+                    ResultDisplay.Text = ""; // 다음 입력을 위해 결과 디스플레이를 초기화
+                }
             }
             catch (FormatException)
             {
