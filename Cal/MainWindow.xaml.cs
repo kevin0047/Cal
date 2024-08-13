@@ -7,47 +7,54 @@ namespace Cal
 {
     public partial class MainWindow : Window
     {
-        private double firstNumber;
-        private double secondNumber;
-        private string operation;
-        private bool lastEqualPressed; // 마지막 연산 기억
-        private double memory; 
+        private double firstNumber; // 첫 번째 숫자 저장
+        private double secondNumber; // 두 번째 숫자 저장
+        private double thirdNumber; // 세번째 숫자 , ResultDisplay.Text값 저장
+        private string operation; // 연산자 저장
+        private bool lastEqualPressed; // 마지막에 '=' 버튼이 눌렸는지 확인
+        
+        private double memory; // 메모리 저장
         private List<double> memoryList = new List<double>(); // 메모리 리스트
 
         public MainWindow()
         {
-            InitializeComponent();
-            Clear(); // Initialize display on startup
+            InitializeComponent();//MainWindow.xaml에 정의된 UI 요소들을 메모리에 로드
+            Clear(); // 시작 시 디스플레이 초기화
         }
 
+        // 디스플레이를 초기화하는 메소드
         private void Clear()
         {
             firstNumber = 0;
             secondNumber = 0;
+            thirdNumber = 0;
             operation = "";
             lastEqualPressed = false;
+            
             ExpressionDisplay.Text = "";
             ResultDisplay.Text = "";
         }
 
+        // 숫자 버튼 클릭 시 호출되는 메소드
         private void NumberButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = (Button)sender;
             string number = button.Content.ToString();
 
-            // Reset display if '=' was last pressed
+            // 마지막에 '=' 버튼이 눌린 상태 (lastEqualPressed = true;)에는 다음연산을 위해 디스플레이를 초기화
             if (lastEqualPressed)
             {
-                ClearDisplayAfterEqual();
-                ResultDisplay.Text = ""; // Clear the result display
+                ClearDisplayAfterEqual(); // ExpressionDisplay 초기화와  lastEqualPressed=flase;로 변경
+                
+                ResultDisplay.Text = ""; // 결과 디스플레이를 초기화
             }
 
-            // Handle decimal point appropriately
-            if (number == "." && !ResultDisplay.Text.Contains("."))
+            // 소수점 처리
+            if (number == "." && !ResultDisplay.Text.Contains(".")) //.버튼도 NumberButton_Click 발생, .이 눌러졌나? 그리고 ResultDisplay에 .이 없나? 
             {
                 ResultDisplay.Text += number;
             }
-            else if (ResultDisplay.Text == "0" || ResultDisplay.Text == "")
+            else if (ResultDisplay.Text == "0" || ResultDisplay.Text == "")// ResultDisplay가 0이거나 빈칸일때 숫자를 누르면 대체되게 처리 01이 되지않도록
             {
                 ResultDisplay.Text = number;
             }
@@ -56,91 +63,139 @@ namespace Cal
                 ResultDisplay.Text += number;
             }
 
-            ExpressionDisplay.Text += number; // Update expression display
+            ExpressionDisplay.Text += number; // 수식 디스플레이 업데이트
         }
 
+        // 연산자 버튼 클릭 시 호출되는 메소드
         private void OperatorButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = (Button)sender;
             operation = button.Content.ToString();
 
-            // Reset display if '=' was last pressed
+            // 마지막에 '=' 버튼이 눌린 후에는 디스플레이를 초기화
             if (lastEqualPressed)
             {
-                ClearDisplayAfterEqual();
+                thirdNumber = double.Parse(ResultDisplay.Text); // 연속연산시 ResultDisplay 값을
+                ClearDisplayAfterEqual(); // display 초기화 하고
+                ExpressionDisplay.Text= thirdNumber.ToString(); // ExpressionDisplay로 넘김 
+
             }
 
             try
             {
                 firstNumber = double.Parse(ResultDisplay.Text);
-                ResultDisplay.Text = ""; // Clear result display for next input
+                ResultDisplay.Text = ""; // 다음 입력을 위해 결과 디스플레이를 초기화
             }
             catch (FormatException)
             {
-                MessageBox.Show("Invalid input. Please enter a valid number.");
+                MessageBox.Show("유효하지 않은 입력입니다. 올바른 숫자를 입력하세요.");
             }
 
-            ExpressionDisplay.Text += operation; // Update expression display
+            ExpressionDisplay.Text += operation; // 수식 디스플레이 업데이트
         }
 
+        // '=' 버튼 클릭 시 호출되는 메소드
         private void EqualButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
+                // 첫 번째 '=' 버튼 클릭 시
                 if (!lastEqualPressed)
                 {
-                    // First '=' press after an operation
+                    // 현재 디스플레이의 값을 두 번째 숫자로 사용
                     secondNumber = double.Parse(ResultDisplay.Text);
-                }
 
-                switch (operation)
-                {
-                    case "+":
-                        firstNumber = firstNumber + secondNumber;
-                        break;
-                    case "-":
-                        firstNumber = firstNumber - secondNumber;
-                        break;
-                    case "*":
-                        firstNumber = firstNumber * secondNumber;
-                        break;
-                    case "/":
-                        if (secondNumber == 0)
-                        {
-                            MessageBox.Show("Division by zero is not allowed.");
+                    // 현재 연산을 수행
+                    switch (operation)
+                    {
+                        case "+":
+                            firstNumber = firstNumber + secondNumber;
+                            break;
+                        case "-":
+                            firstNumber = firstNumber - secondNumber;
+                            break;
+                        case "*":
+                            firstNumber = firstNumber * secondNumber;
+                            break;
+                        case "/":
+                            if (secondNumber == 0)
+                            {
+                                MessageBox.Show("0으로 나눌 수 없습니다.");
+                                return;
+                            }
+                            firstNumber = firstNumber / secondNumber;
+                            break;
+                        default:
+                            MessageBox.Show("유효하지 않은 연산자입니다.");
                             return;
-                        }
-                        firstNumber = firstNumber / secondNumber;
-                        break;
-                    default:
-                        MessageBox.Show("Invalid operator.");
-                        return;
+                    }
+
+                    ResultDisplay.Text = firstNumber.ToString();
+                    ExpressionDisplay.Text += " = " + ResultDisplay.Text;
+
+                    lastEqualPressed = true; // '=' 버튼이 눌렸음을 표시
                 }
+                else
+                {
+                    // 연속 '=' 버튼 클릭 시
+                    // 이전 결과를 첫 번째 숫자로 사용
+                    firstNumber = double.Parse(ResultDisplay.Text); // 현재 결과를 첫 번째 숫자로 사용
 
-                ResultDisplay.Text = firstNumber.ToString();
-                ExpressionDisplay.Text += " = " + ResultDisplay.Text;
-
-                lastEqualPressed = true; // Mark that '=' was pressed
+                    // 현재 연산을 수행
+                    switch (operation)
+                    {
+                        case "+":
+                            firstNumber = firstNumber + secondNumber; // 연속된 결과를 더함
+                            break;
+                        case "-":
+                            firstNumber = firstNumber - secondNumber; // 연속된 결과에서 뺌
+                            break;
+                        case "*":
+                            firstNumber = firstNumber * secondNumber; // 연속된 결과를 곱함
+                            break;
+                        case "/":
+                            if (firstNumber == 0)
+                            {
+                                MessageBox.Show("0으로 나눌 수 없습니다.");
+                                return;
+                            }
+                            firstNumber = firstNumber / secondNumber; // 연속된 결과로 나눔
+                            break;
+                        default:
+                            MessageBox.Show("유효하지 않은 연산자입니다.");
+                            return;
+                    }
+                    ClearDisplayAfterEqual();
+                    ResultDisplay.Text = firstNumber.ToString();
+                    ExpressionDisplay.Text = $"{firstNumber} {operation} {secondNumber} ="; // 연산식과 현재 결과로 업데이트
+                    lastEqualPressed = true;
+                }
             }
             catch (FormatException)
             {
-                MessageBox.Show("Invalid input. Please enter a valid number.");
+                MessageBox.Show("유효하지 않은 입력입니다. 올바른 숫자를 입력하세요.");
             }
         }
 
+
+
+
+
+        // 'C' 버튼 클릭 시 호출되는 메소드
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
             Clear();
         }
 
-        // Method to clear display after '=' is pressed and new input begins
+        // '=' 버튼이 눌린 후 새로운 입력이 시작될 때 디스플레이를 초기화하는 메소드
         private void ClearDisplayAfterEqual()
         {
-            ExpressionDisplay.Text = ""; // Clear the expression display
-            lastEqualPressed = false; // Reset the flag
+            ExpressionDisplay.Text = ""; // 수식 디스플레이를 초기화
+            lastEqualPressed = false; // 플래그 리셋
+            
         }
 
-        // Event handler for the '%' button
+        // '%' 버튼 클릭 시 호출되는 메소드
         private void PercentButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -151,17 +206,17 @@ namespace Cal
             }
             catch (FormatException)
             {
-                MessageBox.Show("Invalid input. Please enter a valid number.");
+                MessageBox.Show("유효하지 않은 입력입니다. 올바른 숫자를 입력하세요.");
             }
         }
 
-        // Event handler for the 'CE' button
+        // 'CE' 버튼 클릭 시 호출되는 메소드
         private void ClearEntryButton_Click(object sender, RoutedEventArgs e)
         {
             ResultDisplay.Text = "0";
         }
 
-        // Event handler for the 'Back' button
+        // 'Back' 버튼 클릭 시 호출되는 메소드
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
             if (ResultDisplay.Text.Length > 0)
@@ -175,7 +230,7 @@ namespace Cal
             }
         }
 
-        // Event handler for the '1/x' button
+        // '1/x' 버튼 클릭 시 호출되는 메소드
         private void ReciprocalButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -186,15 +241,15 @@ namespace Cal
             }
             catch (FormatException)
             {
-                MessageBox.Show("Invalid input. Please enter a valid number.");
+                MessageBox.Show("유효하지 않은 입력입니다. 올바른 숫자를 입력하세요.");
             }
             catch (DivideByZeroException)
             {
-                MessageBox.Show("Cannot divide by zero.");
+                MessageBox.Show("0으로 나눌 수 없습니다.");
             }
         }
 
-        // Event handler for the 'x²' button
+        // 'x²' 버튼 클릭 시 호출되는 메소드
         private void SquareButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -205,11 +260,11 @@ namespace Cal
             }
             catch (FormatException)
             {
-                MessageBox.Show("Invalid input. Please enter a valid number.");
+                MessageBox.Show("유효하지 않은 입력입니다. 올바른 숫자를 입력하세요.");
             }
         }
 
-        // Event handler for the '√x' button
+        // '√x' 버튼 클릭 시 호출되는 메소드
         private void SquareRootButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -220,11 +275,11 @@ namespace Cal
             }
             catch (FormatException)
             {
-                MessageBox.Show("Invalid input. Please enter a valid number.");
+                MessageBox.Show("유효하지 않은 입력입니다. 올바른 숫자를 입력하세요.");
             }
         }
 
-        // Event handler for the '+/-' button
+        // '+/-' 버튼 클릭 시 호출되는 메소드
         private void NegateButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -236,79 +291,79 @@ namespace Cal
             }
             catch (FormatException)
             {
-                MessageBox.Show("Invalid input. Please enter a valid number.");
+                MessageBox.Show("유효하지 않은 입력입니다. 올바른 숫자를 입력하세요.");
             }
         }
 
-        // Event handler for the 'MC' button
+        // 'MC' 버튼 클릭 시 호출되는 메소드
         private void MemoryClearButton_Click(object sender, RoutedEventArgs e)
         {
             memory = 0;
-            MessageBox.Show("Memory Cleared");
+            MessageBox.Show("메모리 삭제됨");
         }
 
-        // Event handler for the 'MR' button
+        // 'MR' 버튼 클릭 시 호출되는 메소드
         private void MemoryRecallButton_Click(object sender, RoutedEventArgs e)
         {
             ResultDisplay.Text = memory.ToString();
         }
 
-        // Event handler for the 'M+' button
+        // 'M+' 버튼 클릭 시 호출되는 메소드
         private void MemoryAddButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 memory += double.Parse(ResultDisplay.Text);
-                MessageBox.Show("Added to Memory");
-                memoryList.Add(memory); // Add updated memory to the list
+                MessageBox.Show("메모리에 추가됨");
+                memoryList.Add(memory); // 업데이트된 메모리를 리스트에 추가
             }
             catch (FormatException)
             {
-                MessageBox.Show("Invalid input. Please enter a valid number.");
+                MessageBox.Show("유효하지 않은 입력입니다. 올바른 숫자를 입력하세요.");
             }
         }
 
-        // Event handler for the 'M-' button
+        // 'M-' 버튼 클릭 시 호출되는 메소드
         private void MemorySubtractButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 memory -= double.Parse(ResultDisplay.Text);
-                MessageBox.Show("Subtracted from Memory");
-                memoryList.Add(memory); // Add updated memory to the list
+                MessageBox.Show("메모리에서 빼기 완료");
+                memoryList.Add(memory); // 업데이트된 메모리를 리스트에 추가
             }
             catch (FormatException)
             {
-                MessageBox.Show("Invalid input. Please enter a valid number.");
+                MessageBox.Show("유효하지 않은 입력입니다. 올바른 숫자를 입력하세요.");
             }
         }
 
-        // Event handler for the 'MS' button
+        // 'MS' 버튼 클릭 시 호출되는 메소드
         private void MemoryStoreButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 memory = double.Parse(ResultDisplay.Text);
-                MessageBox.Show("Value Stored in Memory");
-                memoryList.Add(memory); // Add stored memory to the list
+                MessageBox.Show("메모리에 값이 저장됨");
+                memoryList.Add(memory); // 저장된 메모리를 리스트에 추가
             }
             catch (FormatException)
             {
-                MessageBox.Show("Invalid input. Please enter a valid number.");
+                MessageBox.Show("유효하지 않은 입력입니다. 올바른 숫자를 입력하세요.");
             }
         }
 
-        // Event handler for the 'M목록' button
+        // 'M목록' 버튼 클릭 시 호출되는 메소드
         private void MemoryListButton_Click(object sender, RoutedEventArgs e)
         {
             if (memoryList.Count == 0)
             {
-                MessageBox.Show("No memory stored.");
+                MessageBox.Show("저장된 메모리가 없습니다.");
                 return;
             }
 
             string memoryListString = string.Join("\n", memoryList);
-            MessageBox.Show(memoryListString, "Memory List");
+            MessageBox.Show(memoryListString, "메모리 목록");
         }
     }
 }

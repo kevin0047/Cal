@@ -41,7 +41,7 @@
             <Button Content="√x" Click="SquareRootButton_Click"/>
             <Button Content="/" Click="OperatorButton_Click"/>
 
-            <!-- 다섯 번째 행 -->
+            <!-- 다섯 번째 행 Click 이벤트 발생시 NumberButton_Click의 메서드가 호출됨  -->
             <Button Content="7" Click="NumberButton_Click"/>
             <Button Content="8" Click="NumberButton_Click"/>
             <Button Content="9" Click="NumberButton_Click"/>
