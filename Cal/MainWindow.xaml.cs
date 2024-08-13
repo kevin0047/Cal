@@ -11,8 +11,9 @@ namespace Cal
         private double secondNumber; // 두 번째 숫자 저장
         private double thirdNumber; // 세번째 숫자 , ResultDisplay.Text값 저장
         private string operation; // 연산자 저장
+        private bool lastOperPressed;
         private bool lastEqualPressed; // 마지막에 '=' 버튼이 눌렸는지 확인
-        
+        private string newOper ;
         private double memory; // 메모리 저장
         private List<double> memoryList = new List<double>(); // 메모리 리스트
 
@@ -29,8 +30,9 @@ namespace Cal
             secondNumber = 0;
             thirdNumber = 0;
             operation = "";
+            newOper = "";
             lastEqualPressed = false;
-            
+            lastOperPressed = false;
             ExpressionDisplay.Text = "";
             ResultDisplay.Text = "";
         }
@@ -71,8 +73,8 @@ namespace Cal
         {
             Button button = (Button)sender;
             operation = button.Content.ToString();
-
-            // 마지막에 '=' 버튼이 눌린 후에는 디스플레이를 초기화
+            
+            
 
 
             try
@@ -84,21 +86,49 @@ namespace Cal
                     ExpressionDisplay.Text = thirdNumber.ToString(); // ExpressionDisplay로 넘김 
                     firstNumber = thirdNumber;
                     thirdNumber = 0;
-                    firstNumber = double.Parse(ResultDisplay.Text);
+                    
                     ResultDisplay.Text = ""; // 다음 입력을 위해 결과 디스플레이를 초기화
+                    ExpressionDisplay.Text += operation;
+                    newOper = operation;
+                    
                 }
                 else
                 {
-                    firstNumber = double.Parse(ResultDisplay.Text);
-                    ResultDisplay.Text = ""; // 다음 입력을 위해 결과 디스플레이를 초기화
+                    // 첫 번째 연산 버튼 클릭 시
+                    if (!lastOperPressed)
+                    {
+                        firstNumber = double.Parse(ResultDisplay.Text);
+                        ResultDisplay.Text = ""; // 다음 입력을 위해 결과 디스플레이를 초기화
+                        ExpressionDisplay.Text += operation; // 수식 디스플레이 업데이트
+                        newOper = operation;
+                        lastOperPressed = true; // 연산 버튼이 눌렸음을 표시
+                    }
+                    else
+                    {
+                        // 연속 연산 진행 시
+                        // 이전 결과를 첫 번째 숫자로 사용
+                        
+                        OperCalculation();
+                        newOper = operation;
+                        ResultDisplay.Text = firstNumber.ToString();
+                        ExpressionDisplay.Text = $"{firstNumber}"; // 연산식과 현재 결과로 업데이트
+                        ExpressionDisplay.Text += operation; // 수식 디스플레이 업데이트
+                        ClearDisplayAfterOper();
+                        lastOperPressed = true;
+                    }
+
+
+
+
+                    
                 }
             }
             catch (FormatException)
             {
-                MessageBox.Show("유효하지 않은 입력입니다. 올바른 숫자를 입력하세요.");
+                MessageBox.Show("유효하지 않은 입력입니다. 올바른 연산자를 입력하세요.");
             }
 
-            ExpressionDisplay.Text += operation; // 수식 디스플레이 업데이트
+            
         }
 
         // '=' 버튼 클릭 시 호출되는 메소드
@@ -112,30 +142,7 @@ namespace Cal
                     // 현재 디스플레이의 값을 두 번째 숫자로 사용
                     secondNumber = double.Parse(ResultDisplay.Text);
 
-                    // 현재 연산을 수행
-                    switch (operation)
-                    {
-                        case "+":
-                            firstNumber = firstNumber + secondNumber;
-                            break;
-                        case "-":
-                            firstNumber = firstNumber - secondNumber;
-                            break;
-                        case "*":
-                            firstNumber = firstNumber * secondNumber;
-                            break;
-                        case "/":
-                            if (secondNumber == 0)
-                            {
-                                MessageBox.Show("0으로 나눌 수 없습니다.");
-                                return;
-                            }
-                            firstNumber = firstNumber / secondNumber;
-                            break;
-                        default:
-                            MessageBox.Show("유효하지 않은 연산자입니다.");
-                            return;
-                    }
+                    PerformCalculation();
 
                     ResultDisplay.Text = firstNumber.ToString();
                     ExpressionDisplay.Text += " = " + ResultDisplay.Text;
@@ -148,30 +155,7 @@ namespace Cal
                     // 이전 결과를 첫 번째 숫자로 사용
                     firstNumber = double.Parse(ResultDisplay.Text); // 현재 결과를 첫 번째 숫자로 사용
 
-                    // 현재 연산을 수행
-                    switch (operation)
-                    {
-                        case "+":
-                            firstNumber = firstNumber + secondNumber; // 연속된 결과를 더함
-                            break;
-                        case "-":
-                            firstNumber = firstNumber - secondNumber; // 연속된 결과에서 뺌
-                            break;
-                        case "*":
-                            firstNumber = firstNumber * secondNumber; // 연속된 결과를 곱함
-                            break;
-                        case "/":
-                            if (firstNumber == 0)
-                            {
-                                MessageBox.Show("0으로 나눌 수 없습니다.");
-                                return;
-                            }
-                            firstNumber = firstNumber / secondNumber; // 연속된 결과로 나눔
-                            break;
-                        default:
-                            MessageBox.Show("유효하지 않은 연산자입니다.");
-                            return;
-                    }
+                    PerformCalculation();
                     ClearDisplayAfterEqual();
                     ResultDisplay.Text = firstNumber.ToString();
                     ExpressionDisplay.Text = $"{firstNumber} {operation} {secondNumber} ="; // 연산식과 현재 결과로 업데이트
@@ -185,8 +169,58 @@ namespace Cal
         }
 
 
-
-
+        private void OperCalculation()
+        {
+            switch (newOper)
+            {
+                case "+":
+                    firstNumber = firstNumber + double.Parse(ResultDisplay.Text);
+                    break;
+                case "-":
+                    firstNumber = firstNumber - double.Parse(ResultDisplay.Text);
+                    break;
+                case "*":
+                    firstNumber = firstNumber * double.Parse(ResultDisplay.Text);
+                    break;
+                case "/":
+                    if (secondNumber == 0)
+                    {
+                        MessageBox.Show("0으로 나눌 수 없습니다.");
+                        return;
+                    }
+                    firstNumber = firstNumber / double.Parse(ResultDisplay.Text);
+                    break;
+                default:
+                    MessageBox.Show("유효하지 않은 연산자입니다.");
+                    break;
+            }
+        }
+        private void PerformCalculation()
+        {
+            switch (operation)
+            {
+                case "+":
+                    firstNumber = firstNumber + secondNumber;
+                    break;
+                case "-":
+                    firstNumber = firstNumber - secondNumber;
+                    break;
+                case "*":
+                    firstNumber = firstNumber * secondNumber;
+                    break;
+                case "/":
+                    if (secondNumber == 0)
+                    {
+                        MessageBox.Show("0으로 나눌 수 없습니다.");
+                        return;
+                    }
+                    firstNumber = firstNumber / secondNumber;
+                    break;
+                default:
+                    MessageBox.Show("유효하지 않은 연산자입니다.");
+                    break;
+            }
+        }
 
         // 'C' 버튼 클릭 시 호출되는 메소드
         private void ClearButton_Click(object sender, RoutedEventArgs e)
@@ -199,7 +233,15 @@ namespace Cal
         {
             ExpressionDisplay.Text = ""; // 수식 디스플레이를 초기화
             lastEqualPressed = false; // 플래그 리셋
+    
             
+        }
+        private void ClearDisplayAfterOper()
+        {
+            ResultDisplay.Text = "";
+            lastEqualPressed = false; // 플래그 리셋
+            lastOperPressed = false;
+
         }
 
         // '%' 버튼 클릭 시 호출되는 메소드
